@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
 describe('useLocalStorage', () => {
@@ -8,7 +8,7 @@ describe('useLocalStorage', () => {
   beforeEach(() => {
     store = {}
     // Mock localStorage
-    global.localStorage = {
+    ;(globalThis as typeof globalThis & { localStorage: Storage }).localStorage = {
       getItem: (key: string) => store[key] || null,
       setItem: (key: string, value: string) => {
         store[key] = value
