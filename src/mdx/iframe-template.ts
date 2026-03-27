@@ -7,15 +7,8 @@ export function generateIframeTemplate(theme: 'light' | 'dark'): string {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@18?bundle",
-      "react-dom/client": "https://esm.sh/react-dom@18/client?bundle",
-      "react/jsx-runtime": "https://esm.sh/react@18/jsx-runtime?bundle"
-    }
-  }
-  </script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>${markdownThemeCss}</style>
   <style>
@@ -41,17 +34,26 @@ export function generateIframeTemplate(theme: 'light' | 'dark'): string {
 <body>
   <div id="error-display"></div>
   <div id="root" class="markdown-body"></div>
-  <script type="module">
-    import React from 'react';
-    import { createRoot } from 'react-dom/client';
-    import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+  <script>
+    // jsx-runtime shim using the single global React instance
+    var jsxRuntime = (function() {
+      var createElement = React.createElement;
+      var Fragment = React.Fragment;
+      function jsx(type, props, key) {
+        if (key !== undefined) {
+          props = Object.assign({}, props, { key: key });
+        }
+        return createElement(type, props);
+      }
+      return { jsx: jsx, jsxs: jsx, Fragment: Fragment };
+    })();
 
     ${builtinComponentsCode}
 
-    const builtinComponents = { ${builtinComponentNames.join(', ')} };
+    var builtinComponents = { ${builtinComponentNames.join(', ')} };
 
-    const root = createRoot(document.getElementById('root'));
-    const errorEl = document.getElementById('error-display');
+    var root = ReactDOM.createRoot(document.getElementById('root'));
+    var errorEl = document.getElementById('error-display');
 
     function showError(msg) {
       errorEl.textContent = msg;
@@ -62,40 +64,43 @@ export function generateIframeTemplate(theme: 'light' | 'dark'): string {
       errorEl.style.display = 'none';
     }
 
-    window.addEventListener('message', async (event) => {
-      const { type, code, userComponentCode, theme } = event.data;
+    window.addEventListener('message', function(event) {
+      var data = event.data;
+      if (!data || !data.type) return;
 
-      if (type === 'theme') {
-        document.documentElement.setAttribute('data-theme', theme);
-        document.getElementById('root').setAttribute('data-theme', theme);
+      if (data.type === 'theme') {
+        document.documentElement.setAttribute('data-theme', data.theme);
+        document.getElementById('root').setAttribute('data-theme', data.theme);
         return;
       }
 
-      if (type !== 'render') return;
+      if (data.type !== 'render') return;
 
       try {
         hideError();
 
         // Parse user-defined components
-        let userComponents = {};
-        if (userComponentCode && userComponentCode.trim()) {
+        var userComponents = {};
+        if (data.userComponentCode && data.userComponentCode.trim()) {
           try {
-            const fn = new Function('React', userComponentCode);
+            var fn = new Function('React', data.userComponentCode);
             userComponents = fn(React) || {};
           } catch (e) {
             showError('Component Error: ' + e.message);
           }
         }
 
-        // Execute compiled MDX
-        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-        const mdxFn = new AsyncFunction(code);
-        const mod = await mdxFn({ jsx, jsxs, Fragment });
-        const MDXContent = mod.default;
-
-        // Merge components and render
-        const allComponents = { ...builtinComponents, ...userComponents };
-        root.render(React.createElement(MDXContent, { components: allComponents }));
+        // Execute compiled MDX (function-body format expects {jsx, jsxs, Fragment})
+        var AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+        var mdxFn = new AsyncFunction(data.code);
+        mdxFn(jsxRuntime).then(function(mod) {
+          var MDXContent = mod.default;
+          var allComponents = Object.assign({}, builtinComponents, userComponents);
+          root.render(React.createElement(MDXContent, { components: allComponents }));
+        }).catch(function(e) {
+          showError('Render Error: ' + e.message);
+          window.parent.postMessage({ type: 'error', message: e.message }, '*');
+        });
       } catch (e) {
         showError('Render Error: ' + e.message);
         window.parent.postMessage({ type: 'error', message: e.message }, '*');

@@ -1,23 +1,22 @@
-
-// Each component is a JS string using React.createElement.
-// React is imported in the iframe module scope.
+// Built-in component JS code embedded in the iframe.
+// Uses React UMD global (React.createElement, React.useState, React.Children).
 
 export const builtinComponentsCode = `
-const Callout = ({ type = 'info', children }) => {
-  const styles = {
-    info:    { bg: '#eff6ff', border: '#3b82f6', icon: 'i' },
-    tip:     { bg: '#f0fdf4', border: '#22c55e', icon: '\\u2714' },
-    warning: { bg: '#fffbeb', border: '#f59e0b', icon: '!' },
-    error:   { bg: '#fef2f2', border: '#ef4444', icon: '\\u2718' },
+var Callout = function({ type = 'info', children }) {
+  var styles = {
+    info:    { bg: '#eff6ff', border: '#3b82f6' },
+    tip:     { bg: '#f0fdf4', border: '#22c55e' },
+    warning: { bg: '#fffbeb', border: '#f59e0b' },
+    error:   { bg: '#fef2f2', border: '#ef4444' },
   };
-  const darkStyles = {
+  var darkStyles = {
     info:    { bg: '#1e293b', border: '#3b82f6' },
     tip:     { bg: '#1a2e1a', border: '#22c55e' },
     warning: { bg: '#2e2a1a', border: '#f59e0b' },
     error:   { bg: '#2e1a1a', border: '#ef4444' },
   };
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const s = isDark ? { ...styles[type], ...darkStyles[type] } : styles[type];
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var s = isDark ? Object.assign({}, styles[type], darkStyles[type]) : styles[type];
   return React.createElement('div', {
     style: {
       padding: '12px 16px',
@@ -31,20 +30,21 @@ const Callout = ({ type = 'info', children }) => {
   }, children);
 };
 
-const Tab = ({ children }) => React.createElement('div', null, children);
+var Tab = function({ children }) { return React.createElement('div', null, children); };
 
-const Tabs = ({ children }) => {
-  const [active, setActive] = React.useState(0);
-  const tabs = React.Children.toArray(children).filter(c => c && c.props);
+var Tabs = function({ children }) {
+  var ref = React.useState(0);
+  var active = ref[0], setActive = ref[1];
+  var tabs = React.Children.toArray(children).filter(function(c) { return c && c.props; });
   return React.createElement('div', {
     style: { marginBottom: '16px', border: '1px solid #e0e0e0', borderRadius: '6px', overflow: 'hidden' }
   },
     React.createElement('div', {
       style: { display: 'flex', borderBottom: '1px solid #e0e0e0', background: '#f5f5f5' }
-    }, tabs.map((tab, i) =>
-      React.createElement('button', {
+    }, tabs.map(function(tab, i) {
+      return React.createElement('button', {
         key: i,
-        onClick: () => setActive(i),
+        onClick: function() { setActive(i); },
         style: {
           padding: '8px 16px',
           border: 'none',
@@ -54,15 +54,15 @@ const Tabs = ({ children }) => {
           fontSize: '13px',
           fontWeight: active === i ? '600' : '400',
         }
-      }, tab.props.label || 'Tab ' + (i + 1))
-    )),
+      }, tab.props.label || 'Tab ' + (i + 1));
+    })),
     React.createElement('div', { style: { padding: '12px 16px' } },
       tabs[active] || null
     )
   );
 };
 
-const CodeBlock = ({ lang, children }) => {
+var CodeBlock = function({ lang, children }) {
   return React.createElement('pre', {
     style: {
       background: '#f6f8fa',
@@ -77,34 +77,38 @@ const CodeBlock = ({ lang, children }) => {
   }, children));
 };
 
-const Step = ({ children }) => React.createElement('div', {
-  style: { paddingLeft: '24px', paddingBottom: '16px', borderLeft: '2px solid #e0e0e0', marginLeft: '11px' }
-}, children);
+var Step = function({ children }) {
+  return React.createElement('div', {
+    style: { paddingLeft: '24px', paddingBottom: '16px', borderLeft: '2px solid #e0e0e0', marginLeft: '11px' }
+  }, children);
+};
 
-const Steps = ({ children }) => React.createElement('div', {
-  style: { marginBottom: '16px' }
-}, React.Children.toArray(children).map((child, i) =>
-  React.createElement('div', { key: i, style: { display: 'flex', gap: '0' } },
-    React.createElement('div', {
-      style: {
-        width: '24px', height: '24px', borderRadius: '50%', background: '#3b82f6',
-        color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '12px', fontWeight: '600', flexShrink: '0', marginTop: '2px',
-      }
-    }, i + 1),
-    React.createElement('div', { style: { flex: 1 } }, child)
-  )
-));
+var Steps = function({ children }) {
+  return React.createElement('div', {
+    style: { marginBottom: '16px' }
+  }, React.Children.toArray(children).map(function(child, i) {
+    return React.createElement('div', { key: i, style: { display: 'flex', gap: '0' } },
+      React.createElement('div', {
+        style: {
+          width: '24px', height: '24px', borderRadius: '50%', background: '#3b82f6',
+          color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '12px', fontWeight: '600', flexShrink: '0', marginTop: '2px',
+        }
+      }, i + 1),
+      React.createElement('div', { style: { flex: 1 } }, child)
+    );
+  }));
+};
 
-const Badge = ({ variant = 'default', children }) => {
-  const colors = {
+var Badge = function({ variant = 'default', children }) {
+  var colors = {
     default: { bg: '#e5e7eb', text: '#374151' },
     primary: { bg: '#dbeafe', text: '#1e40af' },
     success: { bg: '#dcfce7', text: '#166534' },
     warning: { bg: '#fef3c7', text: '#92400e' },
     danger:  { bg: '#fee2e2', text: '#991b1b' },
   };
-  const c = colors[variant] || colors.default;
+  var c = colors[variant] || colors.default;
   return React.createElement('span', {
     style: {
       display: 'inline-block', padding: '2px 8px', borderRadius: '9999px',
@@ -113,13 +117,14 @@ const Badge = ({ variant = 'default', children }) => {
   }, children);
 };
 
-const AccordionItem = ({ title, children }) => {
-  const [open, setOpen] = React.useState(false);
+var AccordionItem = function({ title, children }) {
+  var ref = React.useState(false);
+  var open = ref[0], setOpen = ref[1];
   return React.createElement('div', {
     style: { borderBottom: '1px solid #e0e0e0' }
   },
     React.createElement('button', {
-      onClick: () => setOpen(!open),
+      onClick: function() { setOpen(!open); },
       style: {
         width: '100%', padding: '12px 16px', display: 'flex', justifyContent: 'space-between',
         alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer',
@@ -132,9 +137,11 @@ const AccordionItem = ({ title, children }) => {
   );
 };
 
-const Accordion = ({ children }) => React.createElement('div', {
-  style: { border: '1px solid #e0e0e0', borderRadius: '6px', overflow: 'hidden', marginBottom: '16px' }
-}, children);
+var Accordion = function({ children }) {
+  return React.createElement('div', {
+    style: { border: '1px solid #e0e0e0', borderRadius: '6px', overflow: 'hidden', marginBottom: '16px' }
+  }, children);
+};
 `
 
 export const builtinComponentNames = [
