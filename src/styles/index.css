@@ -182,6 +182,24 @@ html, body, #root {
   overflow: hidden;
 }
 
+.component-panel-loading {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.editor-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
 .preview-iframe {
   width: 100%;
   height: 100%;

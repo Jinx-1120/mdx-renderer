@@ -1,14 +1,17 @@
 // src/App.tsx
-import { useCallback } from 'react'
+import { lazy, Suspense, useCallback } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { useTheme } from './hooks/useTheme'
 import { useMdxCompiler } from './hooks/useMdxCompiler'
 import { Toolbar } from './components/Toolbar'
-import { Editor } from './components/Editor'
 import { Preview } from './components/Preview'
 import { Resizer } from './components/Resizer'
 import { ComponentPanel } from './components/ComponentPanel'
 import { defaultMdxContent, defaultComponentSource } from './mdx/default-content'
+
+const Editor = lazy(() =>
+  import('./components/Editor').then(module => ({ default: module.Editor })),
+)
 
 export function App() {
   const { theme, toggleTheme } = useTheme()
@@ -29,11 +32,20 @@ export function App() {
       <Toolbar theme={theme} onToggleTheme={toggleTheme} />
       <div className="main-area">
         <div style={{ width: `${editorWidth}%` }}>
-          <Editor
-            value={mdxSource}
-            onChange={setMdxSource}
-            isDark={theme === 'dark'}
-          />
+          <Suspense
+            fallback={
+              <div className="editor-pane" style={{ flex: 1 }}>
+                <div className="pane-header">MDX</div>
+                <div className="editor-loading">Loading editor...</div>
+              </div>
+            }
+          >
+            <Editor
+              value={mdxSource}
+              onChange={setMdxSource}
+              isDark={theme === 'dark'}
+            />
+          </Suspense>
         </div>
         <Resizer onResize={setEditorWidth} />
         <Preview

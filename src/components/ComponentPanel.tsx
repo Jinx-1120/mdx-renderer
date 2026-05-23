@@ -1,6 +1,4 @@
-import CodeMirror from '@uiw/react-codemirror'
-import { javascript } from '@codemirror/lang-javascript'
-import { oneDark } from '@codemirror/theme-one-dark'
+import { lazy, Suspense } from 'react'
 
 interface ComponentPanelProps {
   value: string
@@ -10,9 +8,9 @@ interface ComponentPanelProps {
   isDark: boolean
 }
 
-const jsxExtensions = [
-  javascript({ jsx: true, typescript: true }),
-]
+const ComponentEditor = lazy(() =>
+  import('./ComponentEditor').then(module => ({ default: module.ComponentEditor })),
+)
 
 export function ComponentPanel({ value, onChange, isOpen, onToggle, isDark }: ComponentPanelProps) {
   return (
@@ -25,26 +23,9 @@ export function ComponentPanel({ value, onChange, isOpen, onToggle, isDark }: Co
       </div>
       {isOpen && (
         <div className="component-panel-content">
-          <CodeMirror
-            value={value}
-            height="200px"
-            theme={isDark ? oneDark : 'light'}
-            extensions={jsxExtensions}
-            onChange={onChange}
-            basicSetup={{
-              lineNumbers: true,
-              highlightActiveLine: true,
-              history: true,
-            }}
-            placeholder="// Define custom React components here using JSX syntax.
-// Example:
-// const MyCard = ({ title, children }) => (
-//   <div className='border rounded-lg p-4'>
-//     <h3 className='font-bold'>{title}</h3>
-//     {children}
-//   </div>
-// )"
-          />
+          <Suspense fallback={<div className="component-panel-loading">Loading editor...</div>}>
+            <ComponentEditor value={value} onChange={onChange} isDark={isDark} />
+          </Suspense>
         </div>
       )}
     </div>

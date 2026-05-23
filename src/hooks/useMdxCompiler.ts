@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { compileMdx } from '../mdx/compiler'
 
 interface CompileResult {
   code: string | null
@@ -15,6 +14,7 @@ export function useMdxCompiler(source: string, debounceMs = 300): CompileResult 
 
     timeoutRef.current = setTimeout(async () => {
       try {
+        const { compileMdx } = await import('../mdx/compiler')
         const code = await compileMdx(source)
         setResult({ code, error: null })
       } catch (e) {
