@@ -1,6 +1,5 @@
 import CodeMirror from '@uiw/react-codemirror'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
-import { languages } from '@codemirror/language-data'
 import { oneDark } from '@codemirror/theme-one-dark'
 
 interface EditorProps {
@@ -10,7 +9,7 @@ interface EditorProps {
 }
 
 const mdxExtensions = [
-  markdown({ base: markdownLanguage, codeLanguages: languages }),
+  markdown({ base: markdownLanguage }),
 ]
 
 export function Editor({ value, onChange, isDark }: EditorProps) {

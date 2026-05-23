@@ -1,6 +1,5 @@
 import { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 import { generateIframeTemplate } from '../mdx/iframe-template'
-import { transformUserComponents, extractComponentNames } from '../mdx/compiler'
 
 interface PreviewProps {
   compiledCode: string | null
@@ -34,12 +33,13 @@ export function Preview({ compiledCode, compileError, userComponentSource, theme
   }, [theme, iframeReady])
 
   // Send compiled code to iframe
-  const sendToIframe = useCallback(() => {
+  const sendToIframe = useCallback(async () => {
     if (!iframeReady || !iframeRef.current || !compiledCode) return
 
     let userComponentCode = ''
     if (userComponentSource.trim()) {
       try {
+        const { transformUserComponents, extractComponentNames } = await import('../mdx/custom-components')
         const transformed = transformUserComponents(userComponentSource)
         const names = extractComponentNames(userComponentSource)
         if (names.length > 0) {

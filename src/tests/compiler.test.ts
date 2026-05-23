@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { compileMdx, transformUserComponents, extractComponentNames } from '../mdx/compiler'
+import { compileMdx } from '../mdx/compiler'
+import { transformUserComponents, extractComponentNames } from '../mdx/custom-components'
 
 describe('compileMdx', () => {
   it('compiles simple markdown to function-body code', async () => {
